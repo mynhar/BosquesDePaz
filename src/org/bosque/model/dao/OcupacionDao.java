@@ -9,16 +9,15 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bosque.model.bean.Cliente;
-import org.bosque.utils.Constantes;
+import org.bosque.model.bean.Ocupacion;
 
-public class ClienteDao {
+public class OcupacionDao {
     /**
      * 
      * @return
      */
-    private Long getMaxIdCliente() {
-	Long persona = new Long(0);
+    private Long getMaxIdOcupacion() {
+	Long ocupacion = new Long(0);
 	ResultSet resultSet = null;
 	Connection conexion = null;
 	Statement objStatement = null;
@@ -30,18 +29,18 @@ public class ClienteDao {
 	    // 2. Crear objecto statement
 	    objStatement = conexion.createStatement();
 
-	    // String msgSQL = "select max(persona) persona from persona";
-	    String msgSQL = "select nvl(max(cliente),0) + 1 id from cliente";
+	    // String msgSQL = "select max(ocupacion) ocupacion from ocupacion";
+	    String msgSQL = "select nvl(max(ocupacion),0) + 1 id from ocupacion";
 
 	    resultSet = objStatement.executeQuery(msgSQL);
 
 	    while (resultSet.next()) {
-		persona = resultSet.getLong("id");
+		ocupacion = resultSet.getLong("id");
 	    }
 	    /*
-	     * if(persona != null && !persona.equals(new Long(0))) { persona =
-	     * persona + 1; } else if(persona <= new Long(0)) { persona = new
-	     * Long(1); } else { persona = new Long(1); }
+	     * if(ocupacion != null && !ocupacion.equals(new Long(0))) {
+	     * ocupacion = ocupacion + 1; } else if(ocupacion <= new Long(0)) {
+	     * ocupacion = new Long(1); } else { ocupacion = new Long(1); }
 	     */
 
 	} catch (Exception e) {
@@ -63,7 +62,7 @@ public class ClienteDao {
 		e.printStackTrace();
 	    }
 	}
-	return persona;
+	return ocupacion;
     }
 
     /**
@@ -71,7 +70,7 @@ public class ClienteDao {
      * @param obj
      * @return
      */
-    public Cliente create(Cliente obj) {
+    public Ocupacion create(Ocupacion obj) {
 
 	Connection conexion = null;
 	PreparedStatement preparedStatement = null;
@@ -81,24 +80,14 @@ public class ClienteDao {
 	    conexion = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "bosques", "bosque123");
 
 	    // 2. Crear objecto statement
-	    String sql = "insert into cliente(" + "cliente, persona, pre_solicitud, contrato, agente, fec_apertura_cta)"
-		    + "values(?, ?, ?, ?, ?, ?)";
+	    String sql = "insert into ocupacion(" + "ocupacion, descripcion) " + "values(?, ?)";
 	    preparedStatement = conexion.prepareStatement(sql);
 
 	    // 3. Establecer parametros de consulta
-	    obj.setId(this.getMaxIdCliente());
+	    obj.setOcupacion(this.getMaxIdOcupacion());
 
-	    preparedStatement.setLong(1, obj.getId());
-	    preparedStatement.setLong(2, obj.getPersona().getPersona());
-	    preparedStatement.setLong(3, obj.getPreSolicitud());
-	    preparedStatement.setLong(4, obj.getContrato());
-
-	    if (obj.getAgente() == null) {
-		preparedStatement.setNull(5, 0);
-	    } else {
-		preparedStatement.setLong(5, obj.getAgente().getAgente());
-	    }
-	    preparedStatement.setDate(6, new java.sql.Date(obj.getFecAperturaCta().getTime()));
+	    preparedStatement.setLong(1, obj.getOcupacion());
+	    preparedStatement.setString(2, obj.getDescripcion());
 
 	    // 4. Ejecutar SQL
 	    int result = preparedStatement.executeUpdate();
@@ -129,7 +118,7 @@ public class ClienteDao {
      * @param obj
      * @return
      */
-    public Cliente update(Cliente obj) {
+    public Ocupacion update(Ocupacion obj) {
 	Connection conexion = null;
 	PreparedStatement preparedStatement = null;
 
@@ -138,18 +127,12 @@ public class ClienteDao {
 	    conexion = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "bosques", "bosque123");
 
 	    // 2. Crear objecto statement
-	    String sql = "update cliente " + "  set persona = ?, " + "      pre_solicitud = ?,  "
-		    + "      contrato = ?,  " + "      agente = ?,  " + "      fec_apertura_cta = ?,  "
-		    + " where Cliente = ?";
+	    String sql = "update ocupacion " + "  set descripcion = ? " + " where ocupacion = ?";
 	    preparedStatement = conexion.prepareStatement(sql);
 
 	    // 3. Establecer parametros de consulta
-	    preparedStatement.setLong(1, obj.getPersona().getPersona());
-	    preparedStatement.setLong(2, obj.getPreSolicitud());
-	    preparedStatement.setLong(3, obj.getContrato());
-	    preparedStatement.setLong(4, obj.getAgente().getAgente());
-	    preparedStatement.setDate(5, new java.sql.Date(obj.getFecAperturaCta().getTime()));
-	    preparedStatement.setLong(6, obj.getId());
+	    preparedStatement.setString(1, obj.getDescripcion());
+	    preparedStatement.setLong(2, obj.getOcupacion());
 
 	    // 4. Ejecutar SQL
 	    int result = preparedStatement.executeUpdate();
@@ -178,7 +161,7 @@ public class ClienteDao {
      * @param obj
      * @return
      */
-    public Cliente read(Cliente obj) {
+    public Ocupacion read(Ocupacion obj) {
 	Connection conexion = null;
 	PreparedStatement preparedStatement = null;
 	ResultSet resultSet = null;
@@ -188,23 +171,19 @@ public class ClienteDao {
 	    conexion = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "bosques", "bosque123");
 
 	    // 2. Crear objecto statement
-	    String sql = "select * from cliente where cliente = ?";
+	    String sql = "select ocupacion, descripcion from ocupacion where ocupacion = ?";
 	    preparedStatement = conexion.prepareStatement(sql);
 
 	    // 3. Establecer parametros de consulta
-	    preparedStatement.setLong(1, obj.getId());
+	    preparedStatement.setLong(1, obj.getOcupacion());
 
 	    // 4. Ejecutar SQL
 	    resultSet = preparedStatement.executeQuery();
 
 	    // 5. Recorrer el ResultSet
 	    while (resultSet.next()) {
-		obj.setId(resultSet.getLong("cliente"));
-		obj.setPersona(Constantes.getPersona(resultSet.getLong("persona")));
-		obj.setPreSolicitud(resultSet.getLong("pre_solicitud"));
-		obj.setContrato(resultSet.getLong("contrato"));
-		obj.setAgente(Constantes.getAgente(resultSet.getLong("agente")));
-		obj.setFecAperturaCta(resultSet.getDate("fec_apertura_cta"));
+		obj.setOcupacion(resultSet.getLong("ocupacion"));
+		obj.setDescripcion(resultSet.getString("descripcion"));
 	    }
 
 	} catch (Exception e) {
@@ -234,7 +213,7 @@ public class ClienteDao {
      * @param obj
      * @return
      */
-    public boolean delete(Cliente obj) {
+    public boolean delete(Ocupacion obj) {
 	Connection conexion = null;
 	PreparedStatement preparedStatement = null;
 
@@ -243,11 +222,11 @@ public class ClienteDao {
 	    conexion = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "bosques", "bosque123");
 
 	    // 2. Crear objecto statement
-	    String sql = "delete from cliente where cliente = ?";
+	    String sql = "delete from ocupacion where ocupacion = ?";
 	    preparedStatement = conexion.prepareStatement(sql);
 
 	    // 3. Establecer parametros de consulta
-	    preparedStatement.setLong(1, obj.getId());
+	    preparedStatement.setLong(1, obj.getOcupacion());
 
 	    // 4. Ejecutar SQL
 	    int result = preparedStatement.executeUpdate();
@@ -278,8 +257,8 @@ public class ClienteDao {
      * 
      * @return
      */
-    public List<Cliente> getList() {
-	List<Cliente> objList = new ArrayList<Cliente>();
+    public List<Ocupacion> getList() {
+	List<Ocupacion> objList = new ArrayList<Ocupacion>();
 	Connection conexion = null;
 	PreparedStatement preparedStatement = null;
 	ResultSet resultSet = null;
@@ -289,25 +268,20 @@ public class ClienteDao {
 	    conexion = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "bosques", "bosque123");
 
 	    // 2. Crear objecto statement
-	    String sql = "select * from cliente";
+	    String sql = "select ocupacion, descripcion from ocupacion";
 	    preparedStatement = conexion.prepareStatement(sql);
 
 	    // 3. Establecer parametros de consulta
-	    // preparedStatement.setLong(1,obj.getIdCliente());
+	    // preparedStatement.setLong(1,obj.getIdOcupacion());
 
 	    // 4. Ejecutar SQL
 	    resultSet = preparedStatement.executeQuery();
 
 	    // 5. Recorrer el ResultSet
 	    while (resultSet.next()) {
-		Cliente obj = new Cliente();
-
-		obj.setId(resultSet.getLong("CLIENTE"));
-		obj.setPersona(Constantes.getPersona(resultSet.getLong("PERSONA")));
-		obj.setPreSolicitud(resultSet.getLong("PRE_SOLICITUD"));
-		obj.setContrato(resultSet.getLong("CONTRATO"));
-		obj.setAgente(Constantes.getAgente(resultSet.getLong("AGENTE")));
-		obj.setFecAperturaCta(resultSet.getDate("FEC_APERTURA_CTA"));
+		Ocupacion obj = new Ocupacion();
+		obj.setOcupacion(resultSet.getLong("ocupacion"));
+		obj.setDescripcion(resultSet.getString("descripcion"));
 
 		objList.add(obj);
 	    }

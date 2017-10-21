@@ -1,5 +1,6 @@
 package org.bosque.model.dao;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -9,16 +10,15 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bosque.model.bean.Cliente;
-import org.bosque.utils.Constantes;
+import org.bosque.model.bean.Lote;
 
-public class ClienteDao {
+public class LoteDao {
     /**
      * 
      * @return
      */
-    private Long getMaxIdCliente() {
-	Long persona = new Long(0);
+    private Long getMaxIdLote() {
+	Long lote = new Long(0);
 	ResultSet resultSet = null;
 	Connection conexion = null;
 	Statement objStatement = null;
@@ -30,18 +30,18 @@ public class ClienteDao {
 	    // 2. Crear objecto statement
 	    objStatement = conexion.createStatement();
 
-	    // String msgSQL = "select max(persona) persona from persona";
-	    String msgSQL = "select nvl(max(cliente),0) + 1 id from cliente";
+	    // String msgSQL = "select max(lote) lote from lote";
+	    String msgSQL = "select nvl(max(lote),0) + 1 id from lote";
 
 	    resultSet = objStatement.executeQuery(msgSQL);
 
 	    while (resultSet.next()) {
-		persona = resultSet.getLong("id");
+		lote = resultSet.getLong("id");
 	    }
 	    /*
-	     * if(persona != null && !persona.equals(new Long(0))) { persona =
-	     * persona + 1; } else if(persona <= new Long(0)) { persona = new
-	     * Long(1); } else { persona = new Long(1); }
+	     * if(lote != null && !lote.equals(new Long(0))) { lote = lote + 1;
+	     * } else if(lote <= new Long(0)) { lote = new Long(1); } else {
+	     * lote = new Long(1); }
 	     */
 
 	} catch (Exception e) {
@@ -63,7 +63,7 @@ public class ClienteDao {
 		e.printStackTrace();
 	    }
 	}
-	return persona;
+	return lote;
     }
 
     /**
@@ -71,7 +71,7 @@ public class ClienteDao {
      * @param obj
      * @return
      */
-    public Cliente create(Cliente obj) {
+    public Lote create(Lote obj) {
 
 	Connection conexion = null;
 	PreparedStatement preparedStatement = null;
@@ -81,24 +81,24 @@ public class ClienteDao {
 	    conexion = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "bosques", "bosque123");
 
 	    // 2. Crear objecto statement
-	    String sql = "insert into cliente(" + "cliente, persona, pre_solicitud, contrato, agente, fec_apertura_cta)"
-		    + "values(?, ?, ?, ?, ?, ?)";
+	    String sql = "insert into lote(lote, zona, fila, secuencia, folio, plano, fec_venta, fec_ult_pago, costo, saldo, estado_lote) "
+		    + "values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	    preparedStatement = conexion.prepareStatement(sql);
 
 	    // 3. Establecer parametros de consulta
-	    obj.setId(this.getMaxIdCliente());
+	    obj.setLote(this.getMaxIdLote());
 
-	    preparedStatement.setLong(1, obj.getId());
-	    preparedStatement.setLong(2, obj.getPersona().getPersona());
-	    preparedStatement.setLong(3, obj.getPreSolicitud());
-	    preparedStatement.setLong(4, obj.getContrato());
-
-	    if (obj.getAgente() == null) {
-		preparedStatement.setNull(5, 0);
-	    } else {
-		preparedStatement.setLong(5, obj.getAgente().getAgente());
-	    }
-	    preparedStatement.setDate(6, new java.sql.Date(obj.getFecAperturaCta().getTime()));
+	    preparedStatement.setLong(1, obj.getLote());
+	    preparedStatement.setString(2, obj.getZona());
+	    preparedStatement.setString(3, obj.getFila());
+	    preparedStatement.setLong(4, obj.getSecuencia());
+	    preparedStatement.setString(5, obj.getFolio());
+	    preparedStatement.setString(6, obj.getPlano());
+	    preparedStatement.setDate(7, new java.sql.Date(obj.getFecVenta().getTime()));
+	    preparedStatement.setDate(8, new java.sql.Date(obj.getFecUltimoPago().getTime()));
+	    preparedStatement.setBigDecimal(9, obj.getCosto());
+	    preparedStatement.setBigDecimal(10, obj.getSaldo());
+	    preparedStatement.setString(11, obj.getEstadoLote());
 
 	    // 4. Ejecutar SQL
 	    int result = preparedStatement.executeUpdate();
@@ -129,7 +129,7 @@ public class ClienteDao {
      * @param obj
      * @return
      */
-    public Cliente update(Cliente obj) {
+    public Lote update(Lote obj) {
 	Connection conexion = null;
 	PreparedStatement preparedStatement = null;
 
@@ -138,18 +138,24 @@ public class ClienteDao {
 	    conexion = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "bosques", "bosque123");
 
 	    // 2. Crear objecto statement
-	    String sql = "update cliente " + "  set persona = ?, " + "      pre_solicitud = ?,  "
-		    + "      contrato = ?,  " + "      agente = ?,  " + "      fec_apertura_cta = ?,  "
-		    + " where Cliente = ?";
+	    String sql = "update lote " + "  set    zona = ?, " + "         fila = ?, " + "         secuencia = ?, "
+		    + "         folio = ?, " + "         plano = ?, " + "         fec_venta = ?, "
+		    + "         fec_ult_pago = ?, " + "         costo = ?, " + "         saldo = ?, "
+		    + "         estado_lote = ? " + " where   lote = ?";
 	    preparedStatement = conexion.prepareStatement(sql);
 
 	    // 3. Establecer parametros de consulta
-	    preparedStatement.setLong(1, obj.getPersona().getPersona());
-	    preparedStatement.setLong(2, obj.getPreSolicitud());
-	    preparedStatement.setLong(3, obj.getContrato());
-	    preparedStatement.setLong(4, obj.getAgente().getAgente());
-	    preparedStatement.setDate(5, new java.sql.Date(obj.getFecAperturaCta().getTime()));
-	    preparedStatement.setLong(6, obj.getId());
+	    preparedStatement.setString(1, obj.getZona());
+	    preparedStatement.setString(2, obj.getFila());
+	    preparedStatement.setLong(3, obj.getSecuencia());
+	    preparedStatement.setString(4, obj.getFolio());
+	    preparedStatement.setString(5, obj.getPlano());
+	    preparedStatement.setDate(6, new java.sql.Date(obj.getFecVenta().getTime()));
+	    preparedStatement.setDate(7, new java.sql.Date(obj.getFecUltimoPago().getTime()));
+	    preparedStatement.setBigDecimal(8, obj.getCosto());
+	    preparedStatement.setBigDecimal(9, obj.getSaldo());
+	    preparedStatement.setString(10, obj.getEstadoLote());
+	    preparedStatement.setLong(11, obj.getLote());
 
 	    // 4. Ejecutar SQL
 	    int result = preparedStatement.executeUpdate();
@@ -178,7 +184,7 @@ public class ClienteDao {
      * @param obj
      * @return
      */
-    public Cliente read(Cliente obj) {
+    public Lote read(Lote obj) {
 	Connection conexion = null;
 	PreparedStatement preparedStatement = null;
 	ResultSet resultSet = null;
@@ -188,23 +194,30 @@ public class ClienteDao {
 	    conexion = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "bosques", "bosque123");
 
 	    // 2. Crear objecto statement
-	    String sql = "select * from cliente where cliente = ?";
+	    String sql = "select lote, zona, fila, secuencia, folio, plano, fec_venta, fec_ult_pago, costo, saldo, estado_lote "
+		    + "from lote " + "where lote = ?";
+
 	    preparedStatement = conexion.prepareStatement(sql);
 
 	    // 3. Establecer parametros de consulta
-	    preparedStatement.setLong(1, obj.getId());
+	    preparedStatement.setLong(1, obj.getLote());
 
 	    // 4. Ejecutar SQL
 	    resultSet = preparedStatement.executeQuery();
 
 	    // 5. Recorrer el ResultSet
 	    while (resultSet.next()) {
-		obj.setId(resultSet.getLong("cliente"));
-		obj.setPersona(Constantes.getPersona(resultSet.getLong("persona")));
-		obj.setPreSolicitud(resultSet.getLong("pre_solicitud"));
-		obj.setContrato(resultSet.getLong("contrato"));
-		obj.setAgente(Constantes.getAgente(resultSet.getLong("agente")));
-		obj.setFecAperturaCta(resultSet.getDate("fec_apertura_cta"));
+		obj.setLote(resultSet.getLong("lote"));
+		obj.setZona(resultSet.getString("zona"));
+		obj.setFila(resultSet.getString("fila"));
+		obj.setSecuencia(resultSet.getLong("secuencia"));
+		obj.setFolio(resultSet.getString("folio"));
+		obj.setPlano(resultSet.getString("plano"));
+		obj.setFecVenta(resultSet.getDate("fec_venta"));
+		obj.setFecUltimoPago(resultSet.getDate("fec_ult_pago"));
+		obj.setCosto(resultSet.getBigDecimal("costo"));
+		obj.setSaldo(resultSet.getBigDecimal("saldo"));
+		obj.setEstadoLote(resultSet.getString("estado_lote"));
 	    }
 
 	} catch (Exception e) {
@@ -234,7 +247,7 @@ public class ClienteDao {
      * @param obj
      * @return
      */
-    public boolean delete(Cliente obj) {
+    public boolean delete(Lote obj) {
 	Connection conexion = null;
 	PreparedStatement preparedStatement = null;
 
@@ -243,11 +256,11 @@ public class ClienteDao {
 	    conexion = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "bosques", "bosque123");
 
 	    // 2. Crear objecto statement
-	    String sql = "delete from cliente where cliente = ?";
+	    String sql = "delete from lote where lote = ?";
 	    preparedStatement = conexion.prepareStatement(sql);
 
 	    // 3. Establecer parametros de consulta
-	    preparedStatement.setLong(1, obj.getId());
+	    preparedStatement.setLong(1, obj.getLote());
 
 	    // 4. Ejecutar SQL
 	    int result = preparedStatement.executeUpdate();
@@ -278,8 +291,8 @@ public class ClienteDao {
      * 
      * @return
      */
-    public List<Cliente> getList() {
-	List<Cliente> objList = new ArrayList<Cliente>();
+    public List<Lote> getList() {
+	List<Lote> objList = new ArrayList<Lote>();
 	Connection conexion = null;
 	PreparedStatement preparedStatement = null;
 	ResultSet resultSet = null;
@@ -289,25 +302,32 @@ public class ClienteDao {
 	    conexion = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "bosques", "bosque123");
 
 	    // 2. Crear objecto statement
-	    String sql = "select * from cliente";
+	    String sql = "select lote, zona, fila, secuencia, folio, plano, fec_venta, fec_ult_pago, costo, saldo, estado_lote "
+		    + "from lote";
+
 	    preparedStatement = conexion.prepareStatement(sql);
 
 	    // 3. Establecer parametros de consulta
-	    // preparedStatement.setLong(1,obj.getIdCliente());
+	    // preparedStatement.setLong(1,obj.getIdLote());
 
 	    // 4. Ejecutar SQL
 	    resultSet = preparedStatement.executeQuery();
 
 	    // 5. Recorrer el ResultSet
 	    while (resultSet.next()) {
-		Cliente obj = new Cliente();
+		Lote obj = new Lote();
 
-		obj.setId(resultSet.getLong("CLIENTE"));
-		obj.setPersona(Constantes.getPersona(resultSet.getLong("PERSONA")));
-		obj.setPreSolicitud(resultSet.getLong("PRE_SOLICITUD"));
-		obj.setContrato(resultSet.getLong("CONTRATO"));
-		obj.setAgente(Constantes.getAgente(resultSet.getLong("AGENTE")));
-		obj.setFecAperturaCta(resultSet.getDate("FEC_APERTURA_CTA"));
+		obj.setLote(resultSet.getLong("lote"));
+		obj.setZona(resultSet.getString("zona"));
+		obj.setFila(resultSet.getString("fila"));
+		obj.setSecuencia(resultSet.getLong("secuencia"));
+		obj.setFolio(resultSet.getString("folio"));
+		obj.setPlano(resultSet.getString("plano"));
+		obj.setFecVenta(resultSet.getDate("fec_venta"));
+		obj.setFecUltimoPago(resultSet.getDate("fec_ult_pago"));
+		obj.setCosto(resultSet.getBigDecimal("costo"));
+		obj.setSaldo(resultSet.getBigDecimal("saldo"));
+		obj.setEstadoLote(resultSet.getString("estado_lote"));
 
 		objList.add(obj);
 	    }

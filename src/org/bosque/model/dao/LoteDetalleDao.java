@@ -5,73 +5,20 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bosque.model.bean.Cliente;
+import org.bosque.model.bean.LoteDetalle;
 import org.bosque.utils.Constantes;
 
-public class ClienteDao {
-    /**
-     * 
-     * @return
-     */
-    private Long getMaxIdCliente() {
-	Long persona = new Long(0);
-	ResultSet resultSet = null;
-	Connection conexion = null;
-	Statement objStatement = null;
-
-	try {
-	    // 1. Crear conexion
-	    conexion = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "bosques", "bosque123");
-
-	    // 2. Crear objecto statement
-	    objStatement = conexion.createStatement();
-
-	    // String msgSQL = "select max(persona) persona from persona";
-	    String msgSQL = "select nvl(max(cliente),0) + 1 id from cliente";
-
-	    resultSet = objStatement.executeQuery(msgSQL);
-
-	    while (resultSet.next()) {
-		persona = resultSet.getLong("id");
-	    }
-	    /*
-	     * if(persona != null && !persona.equals(new Long(0))) { persona =
-	     * persona + 1; } else if(persona <= new Long(0)) { persona = new
-	     * Long(1); } else { persona = new Long(1); }
-	     */
-
-	} catch (Exception e) {
-	    System.out.println(e.getMessage());
-	    e.printStackTrace();
-	} finally {
-	    try {
-		if (resultSet != null) {
-		    resultSet.close();
-		}
-		if (objStatement != null) {
-		    objStatement.close();
-		}
-		if (conexion != null) {
-		    conexion.close();
-		}
-	    } catch (SQLException e) {
-		System.out.println(e.getMessage());
-		e.printStackTrace();
-	    }
-	}
-	return persona;
-    }
+public class LoteDetalleDao {
 
     /**
      * 
      * @param obj
      * @return
      */
-    public Cliente create(Cliente obj) {
+    public LoteDetalle create(LoteDetalle obj) {
 
 	Connection conexion = null;
 	PreparedStatement preparedStatement = null;
@@ -81,24 +28,16 @@ public class ClienteDao {
 	    conexion = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "bosques", "bosque123");
 
 	    // 2. Crear objecto statement
-	    String sql = "insert into cliente(" + "cliente, persona, pre_solicitud, contrato, agente, fec_apertura_cta)"
-		    + "values(?, ?, ?, ?, ?, ?)";
+	    String sql = "insert into loteDetalle(lote, nicho, persona, fec_suceso, estado_nicho "
+		    + "values(?, ?, ?, ?, ?)";
+
 	    preparedStatement = conexion.prepareStatement(sql);
 
-	    // 3. Establecer parametros de consulta
-	    obj.setId(this.getMaxIdCliente());
-
-	    preparedStatement.setLong(1, obj.getId());
-	    preparedStatement.setLong(2, obj.getPersona().getPersona());
-	    preparedStatement.setLong(3, obj.getPreSolicitud());
-	    preparedStatement.setLong(4, obj.getContrato());
-
-	    if (obj.getAgente() == null) {
-		preparedStatement.setNull(5, 0);
-	    } else {
-		preparedStatement.setLong(5, obj.getAgente().getAgente());
-	    }
-	    preparedStatement.setDate(6, new java.sql.Date(obj.getFecAperturaCta().getTime()));
+	    preparedStatement.setLong(1, obj.getLote().getLote());
+	    preparedStatement.setString(2, obj.getNicho());
+	    preparedStatement.setLong(3, obj.getPersona().getPersona());
+	    preparedStatement.setDate(4, new java.sql.Date(obj.getFecSuceso().getTime()));
+	    preparedStatement.setString(5, obj.getEstadoNicho());
 
 	    // 4. Ejecutar SQL
 	    int result = preparedStatement.executeUpdate();
@@ -110,17 +49,14 @@ public class ClienteDao {
 		if (preparedStatement != null) {
 		    preparedStatement.close();
 		}
-
 		if (conexion != null) {
 		    conexion.close();
 		}
-
 	    } catch (SQLException e) {
 		System.out.println(e.getMessage());
 		e.printStackTrace();
 	    }
 	}
-
 	return obj;
     }
 
@@ -129,7 +65,7 @@ public class ClienteDao {
      * @param obj
      * @return
      */
-    public Cliente update(Cliente obj) {
+    public LoteDetalle update(LoteDetalle obj) {
 	Connection conexion = null;
 	PreparedStatement preparedStatement = null;
 
@@ -138,18 +74,16 @@ public class ClienteDao {
 	    conexion = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "bosques", "bosque123");
 
 	    // 2. Crear objecto statement
-	    String sql = "update cliente " + "  set persona = ?, " + "      pre_solicitud = ?,  "
-		    + "      contrato = ?,  " + "      agente = ?,  " + "      fec_apertura_cta = ?,  "
-		    + " where Cliente = ?";
+	    String sql = "update lote_detalle " + "set   fec_suceso = ?, " + "      estado_nicho = ? "
+		    + "where lote    = ? " + "and   nicho   = ? " + "and   persona = ?";
 	    preparedStatement = conexion.prepareStatement(sql);
 
 	    // 3. Establecer parametros de consulta
 	    preparedStatement.setLong(1, obj.getPersona().getPersona());
-	    preparedStatement.setLong(2, obj.getPreSolicitud());
-	    preparedStatement.setLong(3, obj.getContrato());
-	    preparedStatement.setLong(4, obj.getAgente().getAgente());
-	    preparedStatement.setDate(5, new java.sql.Date(obj.getFecAperturaCta().getTime()));
-	    preparedStatement.setLong(6, obj.getId());
+	    preparedStatement.setDate(2, new java.sql.Date(obj.getFecSuceso().getTime()));
+	    preparedStatement.setString(3, obj.getEstadoNicho());
+	    preparedStatement.setLong(4, obj.getLote().getLote());
+	    preparedStatement.setString(5, obj.getNicho());
 
 	    // 4. Ejecutar SQL
 	    int result = preparedStatement.executeUpdate();
@@ -178,7 +112,7 @@ public class ClienteDao {
      * @param obj
      * @return
      */
-    public Cliente read(Cliente obj) {
+    public LoteDetalle read(LoteDetalle obj) {
 	Connection conexion = null;
 	PreparedStatement preparedStatement = null;
 	ResultSet resultSet = null;
@@ -188,23 +122,26 @@ public class ClienteDao {
 	    conexion = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "bosques", "bosque123");
 
 	    // 2. Crear objecto statement
-	    String sql = "select * from cliente where cliente = ?";
+	    String sql = "select lote, nicho, persona, fec_suceso, estado_nicho " + "from lote_detalle "
+		    + "where lote    = ? " + "and   nicho   = ? " + "and   persona = ? ";
+
 	    preparedStatement = conexion.prepareStatement(sql);
 
 	    // 3. Establecer parametros de consulta
-	    preparedStatement.setLong(1, obj.getId());
+	    preparedStatement.setLong(1, obj.getLote().getLote());
+	    preparedStatement.setString(2, obj.getNicho());
+	    preparedStatement.setLong(3, obj.getPersona().getPersona());
 
 	    // 4. Ejecutar SQL
 	    resultSet = preparedStatement.executeQuery();
 
 	    // 5. Recorrer el ResultSet
 	    while (resultSet.next()) {
-		obj.setId(resultSet.getLong("cliente"));
+		obj.setLote(Constantes.getLote(resultSet.getLong("lote")));
+		obj.setNicho(resultSet.getString("nicho"));
 		obj.setPersona(Constantes.getPersona(resultSet.getLong("persona")));
-		obj.setPreSolicitud(resultSet.getLong("pre_solicitud"));
-		obj.setContrato(resultSet.getLong("contrato"));
-		obj.setAgente(Constantes.getAgente(resultSet.getLong("agente")));
-		obj.setFecAperturaCta(resultSet.getDate("fec_apertura_cta"));
+		obj.setFecSuceso(new java.sql.Date(resultSet.getDate("fec_suceso").getTime()));
+		obj.setEstadoNicho(resultSet.getString("estado_lote"));
 	    }
 
 	} catch (Exception e) {
@@ -234,7 +171,7 @@ public class ClienteDao {
      * @param obj
      * @return
      */
-    public boolean delete(Cliente obj) {
+    public boolean delete(LoteDetalle obj) {
 	Connection conexion = null;
 	PreparedStatement preparedStatement = null;
 
@@ -243,11 +180,13 @@ public class ClienteDao {
 	    conexion = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "bosques", "bosque123");
 
 	    // 2. Crear objecto statement
-	    String sql = "delete from cliente where cliente = ?";
+	    String sql = "delete from lote_detalle where lote = ? and nicho = ? and persona = ?";
 	    preparedStatement = conexion.prepareStatement(sql);
 
 	    // 3. Establecer parametros de consulta
-	    preparedStatement.setLong(1, obj.getId());
+	    preparedStatement.setLong(1, obj.getLote().getLote());
+	    preparedStatement.setString(2, obj.getNicho());
+	    preparedStatement.setLong(3, obj.getPersona().getPersona());
 
 	    // 4. Ejecutar SQL
 	    int result = preparedStatement.executeUpdate();
@@ -278,8 +217,8 @@ public class ClienteDao {
      * 
      * @return
      */
-    public List<Cliente> getList() {
-	List<Cliente> objList = new ArrayList<Cliente>();
+    public List<LoteDetalle> getList(LoteDetalle objDet) {
+	List<LoteDetalle> objList = new ArrayList<LoteDetalle>();
 	Connection conexion = null;
 	PreparedStatement preparedStatement = null;
 	ResultSet resultSet = null;
@@ -289,25 +228,26 @@ public class ClienteDao {
 	    conexion = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "bosques", "bosque123");
 
 	    // 2. Crear objecto statement
-	    String sql = "select * from cliente";
+	    String sql = "select lote, nicho, persona, fec_suceso, estado_nicho " + "from lote_detalle "
+		    + "where lote     = ? ";
+
 	    preparedStatement = conexion.prepareStatement(sql);
 
 	    // 3. Establecer parametros de consulta
-	    // preparedStatement.setLong(1,obj.getIdCliente());
+	    preparedStatement.setLong(1, objDet.getLote().getLote());
 
 	    // 4. Ejecutar SQL
 	    resultSet = preparedStatement.executeQuery();
 
 	    // 5. Recorrer el ResultSet
 	    while (resultSet.next()) {
-		Cliente obj = new Cliente();
+		LoteDetalle obj = new LoteDetalle();
 
-		obj.setId(resultSet.getLong("CLIENTE"));
-		obj.setPersona(Constantes.getPersona(resultSet.getLong("PERSONA")));
-		obj.setPreSolicitud(resultSet.getLong("PRE_SOLICITUD"));
-		obj.setContrato(resultSet.getLong("CONTRATO"));
-		obj.setAgente(Constantes.getAgente(resultSet.getLong("AGENTE")));
-		obj.setFecAperturaCta(resultSet.getDate("FEC_APERTURA_CTA"));
+		obj.setLote(Constantes.getLote(resultSet.getLong("lote")));
+		obj.setNicho(resultSet.getString("nicho"));
+		obj.setPersona(Constantes.getPersona(resultSet.getLong("persona")));
+		obj.setFecSuceso(new java.sql.Date(resultSet.getDate("fec_suceso").getTime()));
+		obj.setEstadoNicho(resultSet.getString("estado_lote"));
 
 		objList.add(obj);
 	    }

@@ -18,7 +18,7 @@ import org.bosque.proceso.facturacion.FacturacionView;
 
 public class PrincipalFrame extends JFrame {
 	
-	JPanel mantPanel = new JPanel();
+	private static JPanel mantPanel = new JPanel();
 	
 	public PrincipalFrame(){
 		
@@ -169,7 +169,7 @@ public class PrincipalFrame extends JFrame {
 			});
 			
 			JMenuItem lotes = new JMenuItem("Lotes");
-			JMenuItem contratos = new JMenuItem("Contratos");
+			
 			//******************************************************************************
 			
 			procesos.add(ventaLotes);
@@ -177,7 +177,7 @@ public class PrincipalFrame extends JFrame {
 			mantenimientos.add(clientes);
 			mantenimientos.add(personas);
 			mantenimientos.add(lotes);
-			mantenimientos.add(contratos);		
+					
 			barraMenu.add(procesos);
 			barraMenu.add(mantenimientos);
 			barraMenu.add(consultas);	

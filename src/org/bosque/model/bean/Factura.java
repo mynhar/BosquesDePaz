@@ -6,134 +6,114 @@ import java.util.Date;
 public class Factura {
 	
 	private Long idFactura;
-	private String tipofactura;
-	private Long cliente;
-	private Long contrato;
-	private Long servicio;
-	private Long lote;
-	private Date fechaContratacion;
-	private Date fechaEjecucion;
-	private Date fechaVenta;
-	private Date fechaVence;
-	private BigDecimal costoServicio;
-	private String estado;
-	
-	
+	private String tipofactura;//	2		N	VARCHAR2 (2 Byte)		Yes		
+	private Cliente cliente;//	3		N	NUMBER		Yes		
+	private Agente agente;//	4		Y	NUMBER (2)		Yes		
+	private Date fecFactura;//	5		N	DATE		Yes		
+	private Long mesesPlazo;//	6		Y	NUMBER (3)		Yes		
+	private BigDecimal montoFactura;//	7		N	NUMBER (17,2)		Yes		
+	private String estadoFactura;//	8		Y	VARCHAR2 (1 Byte)		Yes
 	
 	
 	/**
-	 * @param factura
-	 * @param tipofactura
-	 * @param cliente
-	 * @param contrato
-	 * @param servicio
-	 * @param lote
-	 * @param fechaContratacion
-	 * @param fechaEjecucion
-	 * @param fechaVenta
-	 * @param fechaVence
-	 * @param costoServicio
-	 * @param estado
+	 * @return the idFactura
 	 */
-	public Factura(Long factura, String tipofactura, Long cliente, Long contrato, Long servicio, Long lote,
-			Date fechaContratacion, Date fechaEjecucion, Date fechaVenta, Date fechaVence, BigDecimal costoServicio,
-			String estado) {
-		super();
-		this.idFactura = factura;
-		this.tipofactura = tipofactura;
-		this.cliente = cliente;
-		this.contrato = contrato;
-		this.servicio = servicio;
-		this.lote = lote;
-		this.fechaContratacion = fechaContratacion;
-		this.fechaEjecucion = fechaEjecucion;
-		this.fechaVenta = fechaVenta;
-		this.fechaVence = fechaVence;
-		this.costoServicio = costoServicio;
-		this.estado = estado;
-	}
-	
-	/**
-	 * 
-	 */
-	public Factura() {
-		// constructor vacio...
-	}	
-	
-	
 	public Long getIdFactura() {
 		return idFactura;
 	}
-
+	/**
+	 * @param idFactura the idFactura to set
+	 */
 	public void setIdFactura(Long idFactura) {
 		this.idFactura = idFactura;
 	}
-
+	/**
+	 * @return the tipofactura
+	 */
 	public String getTipofactura() {
 		return tipofactura;
 	}
+	/**
+	 * @param tipofactura the tipofactura to set
+	 */
 	public void setTipofactura(String tipofactura) {
 		this.tipofactura = tipofactura;
 	}
-	public Long getCliente() {
+	/**
+	 * @return the cliente
+	 */
+	public Cliente getCliente() {
 		return cliente;
 	}
-	public void setCliente(Long cliente) {
+	/**
+	 * @param cliente the cliente to set
+	 */
+	public void setCliente(Cliente cliente) {
 		this.cliente = cliente;
 	}
-	public Long getContrato() {
-		return contrato;
+	/**
+	 * @return the agente
+	 */
+	public Agente getAgente() {
+		return agente;
 	}
-	public void setContrato(Long contrato) {
-		this.contrato = contrato;
+	/**
+	 * @param agente the agente to set
+	 */
+	public void setAgente(Agente agente) {
+		this.agente = agente;
 	}
-	public Long getServicio() {
-		return servicio;
+	/**
+	 * @return the fecFactura
+	 */
+	public Date getFecFactura() {
+		return fecFactura;
 	}
-	public void setServicio(Long servicio) {
-		this.servicio = servicio;
+	/**
+	 * @param fecFactura the fecFactura to set
+	 */
+	public void setFecFactura(Date fecFactura) {
+		this.fecFactura = fecFactura;
 	}
-	public Long getLote() {
-		return lote;
+	/**
+	 * @return the mesesPlazo
+	 */
+	public Long getMesesPlazo() {
+		return mesesPlazo;
 	}
-	public void setLote(Long lote) {
-		this.lote = lote;
+	/**
+	 * @param mesesPlazo the mesesPlazo to set
+	 */
+	public void setMesesPlazo(Long mesesPlazo) {
+		this.mesesPlazo = mesesPlazo;
 	}
-	public Date getFechaContratacion() {
-		return fechaContratacion;
+	/**
+	 * @return the montoFactura
+	 */
+	public BigDecimal getMontoFactura() {
+		return montoFactura;
 	}
-	public void setFechaContratacion(Date fechaContratacion) {
-		this.fechaContratacion = fechaContratacion;
+	/**
+	 * @param montoFactura the montoFactura to set
+	 */
+	public void setMontoFactura(BigDecimal montoFactura) {
+		this.montoFactura = montoFactura;
 	}
-	public Date getFechaEjecucion() {
-		return fechaEjecucion;
+	/**
+	 * @return the estadoFactura
+	 */
+	public String getEstadoFactura() {
+		return estadoFactura;
 	}
-	public void setFechaEjecucion(Date fechaEjecucion) {
-		this.fechaEjecucion = fechaEjecucion;
+	/**
+	 * @param estadoFactura the estadoFactura to set
+	 */
+	public void setEstadoFactura(String estadoFactura) {
+		this.estadoFactura = estadoFactura;
 	}
-	public Date getFechaVenta() {
-		return fechaVenta;
-	}
-	public void setFechaVenta(Date fechaVenta) {
-		this.fechaVenta = fechaVenta;
-	}
-	public Date getFechaVence() {
-		return fechaVence;
-	}
-	public void setFechaVence(Date fechaVence) {
-		this.fechaVence = fechaVence;
-	}
-	public BigDecimal getCostoServicio() {
-		return costoServicio;
-	}
-	public void setCostoServicio(BigDecimal costoServicio) {
-		this.costoServicio = costoServicio;
-	}
-	public String getEstado() {
-		return estado;
-	}
-	public void setEstado(String estado) {
-		this.estado = estado;
-	}
+
+
+
+	
 
 }

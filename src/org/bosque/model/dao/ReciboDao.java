@@ -9,16 +9,16 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bosque.model.bean.Cliente;
+import org.bosque.model.bean.Recibo;
 import org.bosque.utils.Constantes;
 
-public class ClienteDao {
+public class ReciboDao {
     /**
      * 
      * @return
      */
-    private Long getMaxIdCliente() {
-	Long persona = new Long(0);
+    private Long getMaxIdRecibo() {
+	Long recibo = new Long(0);
 	ResultSet resultSet = null;
 	Connection conexion = null;
 	Statement objStatement = null;
@@ -30,18 +30,18 @@ public class ClienteDao {
 	    // 2. Crear objecto statement
 	    objStatement = conexion.createStatement();
 
-	    // String msgSQL = "select max(persona) persona from persona";
-	    String msgSQL = "select nvl(max(cliente),0) + 1 id from cliente";
+	    // String msgSQL = "select max(recibo) recibo from recibo";
+	    String msgSQL = "select nvl(max(recibo),0) + 1 id from recibo";
 
 	    resultSet = objStatement.executeQuery(msgSQL);
 
 	    while (resultSet.next()) {
-		persona = resultSet.getLong("id");
+		recibo = resultSet.getLong("id");
 	    }
 	    /*
-	     * if(persona != null && !persona.equals(new Long(0))) { persona =
-	     * persona + 1; } else if(persona <= new Long(0)) { persona = new
-	     * Long(1); } else { persona = new Long(1); }
+	     * if(recibo != null && !recibo.equals(new Long(0))) { recibo =
+	     * recibo + 1; } else if(recibo <= new Long(0)) { recibo = new
+	     * Long(1); } else { recibo = new Long(1); }
 	     */
 
 	} catch (Exception e) {
@@ -63,7 +63,7 @@ public class ClienteDao {
 		e.printStackTrace();
 	    }
 	}
-	return persona;
+	return recibo;
     }
 
     /**
@@ -71,7 +71,7 @@ public class ClienteDao {
      * @param obj
      * @return
      */
-    public Cliente create(Cliente obj) {
+    public Recibo create(Recibo obj) {
 
 	Connection conexion = null;
 	PreparedStatement preparedStatement = null;
@@ -81,24 +81,22 @@ public class ClienteDao {
 	    conexion = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "bosques", "bosque123");
 
 	    // 2. Crear objecto statement
-	    String sql = "insert into cliente(" + "cliente, persona, pre_solicitud, contrato, agente, fec_apertura_cta)"
-		    + "values(?, ?, ?, ?, ?, ?)";
+	    String sql = "insert into recibo("
+		    + "recibo, cliente, factura, fec_recibo, concepto, tipo_pago, monto, estado_recibo) "
+		    + "values(?, ?, ?, ?, ?, ?, ?, ?)";
 	    preparedStatement = conexion.prepareStatement(sql);
 
 	    // 3. Establecer parametros de consulta
-	    obj.setId(this.getMaxIdCliente());
+	    obj.setRecibo(this.getMaxIdRecibo());
 
-	    preparedStatement.setLong(1, obj.getId());
-	    preparedStatement.setLong(2, obj.getPersona().getPersona());
-	    preparedStatement.setLong(3, obj.getPreSolicitud());
-	    preparedStatement.setLong(4, obj.getContrato());
-
-	    if (obj.getAgente() == null) {
-		preparedStatement.setNull(5, 0);
-	    } else {
-		preparedStatement.setLong(5, obj.getAgente().getAgente());
-	    }
-	    preparedStatement.setDate(6, new java.sql.Date(obj.getFecAperturaCta().getTime()));
+	    preparedStatement.setLong(1, obj.getRecibo());
+	    preparedStatement.setLong(2, obj.getCliente().getId());
+	    preparedStatement.setLong(3, obj.getFactura().getIdFactura());
+	    preparedStatement.setDate(4, new java.sql.Date(obj.getFecRecibo().getTime()));
+	    preparedStatement.setLong(5, obj.getConcepto().getConcepto());
+	    preparedStatement.setString(6, obj.getTipoPago());
+	    preparedStatement.setBigDecimal(7, obj.getMonto());
+	    preparedStatement.setString(8, obj.getEstadoRecibo());
 
 	    // 4. Ejecutar SQL
 	    int result = preparedStatement.executeUpdate();
@@ -129,7 +127,7 @@ public class ClienteDao {
      * @param obj
      * @return
      */
-    public Cliente update(Cliente obj) {
+    public Recibo update(Recibo obj) {
 	Connection conexion = null;
 	PreparedStatement preparedStatement = null;
 
@@ -138,18 +136,27 @@ public class ClienteDao {
 	    conexion = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "bosques", "bosque123");
 
 	    // 2. Crear objecto statement
-	    String sql = "update cliente " + "  set persona = ?, " + "      pre_solicitud = ?,  "
-		    + "      contrato = ?,  " + "      agente = ?,  " + "      fec_apertura_cta = ?,  "
-		    + " where Cliente = ?";
+	    String sql =
+	    	"update recibo " +
+	    	"set    cliente = ?, " +
+	    	"       factura = ?, " +
+	    	"       fec_recibo = ?, " +
+	    	"       concepto = ?, " +
+	    	"       tipo_pago = ?, " +
+	    	"       monto = ?, " +
+	    	"       estado_recibo = ? " +
+	    	" where recibo = ?";
 	    preparedStatement = conexion.prepareStatement(sql);
 
 	    // 3. Establecer parametros de consulta
-	    preparedStatement.setLong(1, obj.getPersona().getPersona());
-	    preparedStatement.setLong(2, obj.getPreSolicitud());
-	    preparedStatement.setLong(3, obj.getContrato());
-	    preparedStatement.setLong(4, obj.getAgente().getAgente());
-	    preparedStatement.setDate(5, new java.sql.Date(obj.getFecAperturaCta().getTime()));
-	    preparedStatement.setLong(6, obj.getId());
+	    preparedStatement.setLong(1, obj.getCliente().getId());
+	    preparedStatement.setLong(2, obj.getCliente().getId());
+	    preparedStatement.setLong(3, obj.getFactura().getIdFactura());
+	    preparedStatement.setDate(4, new java.sql.Date(obj.getFecRecibo().getTime()));
+	    preparedStatement.setLong(5, obj.getConcepto().getConcepto());
+	    preparedStatement.setString(6, obj.getTipoPago());
+	    preparedStatement.setBigDecimal(7, obj.getMonto());
+	    preparedStatement.setLong(8, obj.getRecibo());
 
 	    // 4. Ejecutar SQL
 	    int result = preparedStatement.executeUpdate();
@@ -178,7 +185,7 @@ public class ClienteDao {
      * @param obj
      * @return
      */
-    public Cliente read(Cliente obj) {
+    public Recibo read(Recibo obj) {
 	Connection conexion = null;
 	PreparedStatement preparedStatement = null;
 	ResultSet resultSet = null;
@@ -188,23 +195,28 @@ public class ClienteDao {
 	    conexion = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "bosques", "bosque123");
 
 	    // 2. Crear objecto statement
-	    String sql = "select * from cliente where cliente = ?";
+	    // "recibo, cliente, factura, fec_recibo, concepto, tipo_pago, monto, estado_recibo) " +
+
+	    String sql = "select recibo, cliente, factura, fec_recibo, concepto, tipo_pago, monto, estado_recibo " +
+		    "from recibo where recibo = ?";
 	    preparedStatement = conexion.prepareStatement(sql);
 
 	    // 3. Establecer parametros de consulta
-	    preparedStatement.setLong(1, obj.getId());
+	    preparedStatement.setLong(1, obj.getRecibo());
 
 	    // 4. Ejecutar SQL
 	    resultSet = preparedStatement.executeQuery();
 
 	    // 5. Recorrer el ResultSet
 	    while (resultSet.next()) {
-		obj.setId(resultSet.getLong("cliente"));
-		obj.setPersona(Constantes.getPersona(resultSet.getLong("persona")));
-		obj.setPreSolicitud(resultSet.getLong("pre_solicitud"));
-		obj.setContrato(resultSet.getLong("contrato"));
-		obj.setAgente(Constantes.getAgente(resultSet.getLong("agente")));
-		obj.setFecAperturaCta(resultSet.getDate("fec_apertura_cta"));
+		obj.setRecibo(resultSet.getLong("recibo"));
+		obj.setCliente(Constantes.getCliente(resultSet.getLong("cliente")));
+		obj.setFactura(Constantes.getFactura(resultSet.getLong("factura")));
+		obj.setFecRecibo(resultSet.getDate("fec_recibo"));
+		obj.setConcepto(Constantes.getConcepto(resultSet.getLong("concepto")));
+		obj.setTipoPago(resultSet.getString("tipo_pago"));
+		obj.setMonto(resultSet.getBigDecimal("monto"));
+		obj.setEstadoRecibo(resultSet.getString("estado_recibo"));
 	    }
 
 	} catch (Exception e) {
@@ -234,7 +246,7 @@ public class ClienteDao {
      * @param obj
      * @return
      */
-    public boolean delete(Cliente obj) {
+    public boolean delete(Recibo obj) {
 	Connection conexion = null;
 	PreparedStatement preparedStatement = null;
 
@@ -243,11 +255,11 @@ public class ClienteDao {
 	    conexion = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "bosques", "bosque123");
 
 	    // 2. Crear objecto statement
-	    String sql = "delete from cliente where cliente = ?";
+	    String sql = "delete from recibo where recibo = ?";
 	    preparedStatement = conexion.prepareStatement(sql);
 
 	    // 3. Establecer parametros de consulta
-	    preparedStatement.setLong(1, obj.getId());
+	    preparedStatement.setLong(1, obj.getRecibo());
 
 	    // 4. Ejecutar SQL
 	    int result = preparedStatement.executeUpdate();
@@ -278,8 +290,8 @@ public class ClienteDao {
      * 
      * @return
      */
-    public List<Cliente> getList() {
-	List<Cliente> objList = new ArrayList<Cliente>();
+    public List<Recibo> getList() {
+	List<Recibo> objList = new ArrayList<Recibo>();
 	Connection conexion = null;
 	PreparedStatement preparedStatement = null;
 	ResultSet resultSet = null;
@@ -289,25 +301,28 @@ public class ClienteDao {
 	    conexion = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "bosques", "bosque123");
 
 	    // 2. Crear objecto statement
-	    String sql = "select * from cliente";
+	    String sql = "select recibo, cliente, factura, fec_recibo, concepto, tipo_pago, monto, estado_recibo " +
+		    "from recibo";
 	    preparedStatement = conexion.prepareStatement(sql);
 
 	    // 3. Establecer parametros de consulta
-	    // preparedStatement.setLong(1,obj.getIdCliente());
+	    // preparedStatement.setLong(1,obj.getIdRecibo());
 
 	    // 4. Ejecutar SQL
 	    resultSet = preparedStatement.executeQuery();
 
 	    // 5. Recorrer el ResultSet
 	    while (resultSet.next()) {
-		Cliente obj = new Cliente();
+		Recibo obj = new Recibo();
 
-		obj.setId(resultSet.getLong("CLIENTE"));
-		obj.setPersona(Constantes.getPersona(resultSet.getLong("PERSONA")));
-		obj.setPreSolicitud(resultSet.getLong("PRE_SOLICITUD"));
-		obj.setContrato(resultSet.getLong("CONTRATO"));
-		obj.setAgente(Constantes.getAgente(resultSet.getLong("AGENTE")));
-		obj.setFecAperturaCta(resultSet.getDate("FEC_APERTURA_CTA"));
+		obj.setRecibo(resultSet.getLong("recibo"));
+		obj.setCliente(Constantes.getCliente(resultSet.getLong("cliente")));
+		obj.setFactura(Constantes.getFactura(resultSet.getLong("factura")));
+		obj.setFecRecibo(resultSet.getDate("fec_recibo"));
+		obj.setConcepto(Constantes.getConcepto(resultSet.getLong("concepto")));
+		obj.setTipoPago(resultSet.getString("tipo_pago"));
+		obj.setMonto(resultSet.getBigDecimal("monto"));
+		obj.setEstadoRecibo(resultSet.getString("estado_recibo"));
 
 		objList.add(obj);
 	    }
